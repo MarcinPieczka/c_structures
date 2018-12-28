@@ -2,6 +2,7 @@
 First make HT without resizing of buckets
 """
 import ctypes as ct
+import pudb
 
 
 class HashTable:
@@ -44,13 +45,13 @@ class HashTable:
                 data=ct.cast(darray, ct.POINTER(ct.POINTER(self.data_struct))),
             ))
         else:
+            #pudb.set_trace()
             bucket = self.buckets[bucket_index].contents
-            print(type(bucket))
             old_size = bucket.array_size
             old_len = bucket.data_len
-            resized = (ct.POINTER(self.data_struct) * (old_size + 1))(*bucket.data.contents)
-            bucket.data = ct.pointer(resized)
-            bucket.data.contents[old_size] = ct.pointer(d_struct)
+            resized = (ct.POINTER(self.data_struct) * (old_size + 1))(bucket.data.contents)
+            resized[old_len] = ct.pointer(d_struct)
+            bucket.data = ct.pointer(ct.cast(resized, ct.POINTER(self.data_struct)))
             bucket.array_size = ct.c_uint16(old_size + 1)
             bucket.data_len = ct.c_uint16(old_len + 1)
 
