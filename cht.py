@@ -33,7 +33,7 @@ class HashTable:
         self.buckets = (self.bucket_struct * self.bucket_count)()
 
     def __setitem__(self, key, values):
-        if key == 'test1024':
+        if key == '-test1024':
             pudb.set_trace()
         key_hash = hash(key)
         bucket_index = self._bucket_index(key_hash)
