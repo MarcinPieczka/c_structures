@@ -49,13 +49,13 @@ class HashTable:
             for i in range(bucket.data_len):
                 data_index = bucket.indexes[i]
                 if self.data[data_index].cht_key == key:
-                    self.data[data_index] = ct.pointer(data_struct)
+                    self.data[data_index] = data_struct
                     return
 
         if self.len >= self.data_slots:
             self.data_slots *= 2
             self.data = self._resize_array(
-                ct.POINTER(self.data_struct),
+                self.data_struct,
                 self.data_slots,
                 self.data
             )
@@ -89,10 +89,10 @@ class HashTable:
         bucket_index = self._bucket_index(hash(key))
         bucket = self.buckets[bucket_index]
         if bucket:
-            for i in range(bucket.contents.data_len):
-                data_index = bucket.contents.indexes[i]
-                if self.data[data_index].contents.cht_key == key:
-                    return self._getdict(self.data[data_index].contents)
+            for i in range(bucket.data_len):
+                data_index = bucket.indexes[i]
+                if self.data[data_index].cht_key == key:
+                    return self._getdict(self.data[data_index])
         raise KeyError()
 
     def get(self, key, default=None):
@@ -110,6 +110,7 @@ class HashTable:
     @staticmethod
     def _resize_array(structure, length, old_array):
         new = (structure * length)()
+        print(f"new size: {ct.sizeof(new)}, old size: {ct.sizeof(old_array)}")
         ct.memmove(new, old_array, ct.sizeof(old_array))
         return new
 
@@ -123,9 +124,6 @@ class HashTable:
         return self.len
 
     def __repr__(self):
-        return str(self)
-
-    def __str__(self):
         entry_nr = len(self) if len(self) < 20 else 20
         entries = {}
         for i in range(entry_nr):
@@ -135,4 +133,14 @@ class HashTable:
             del d['cht_key_hash']
             entries[key] = d
         return f"HashTable{pformat(entries)[1:-1]}\n{' ...' if self.len >= 20 else ''}}})"
+
+    def __str__(self):
+        entries = {}
+        for i in range(self.len):
+            d = self._getdict(self.data[i])
+            key = d['cht_key']
+            del d['cht_key']
+            del d['cht_key_hash']
+            entries[key] = d
+        return pformat(entries)
 
