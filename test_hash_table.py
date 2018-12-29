@@ -11,7 +11,7 @@ if backend == 'ht':
 if backend in ('dt', 'dd'):
     ht = dict()
 if backend == 'ch':
-    ht = HashTable(c.c_wchar_p, {'height': c.c_uint16, 'width': c.c_uint16, 'sth': c.c_int64, 'sth2': c.c_int64})
+    ht = HashTable(c.c_uint64, {'height': c.c_uint16, 'width': c.c_uint16, 'sth': c.c_int64, 'sth2': c.c_int64})
 stats = {'min': 234., 'max': 0., 'sum': 0.}
 try:
     for i in range(10**7):
@@ -23,11 +23,10 @@ try:
             stats = {'min': 234, 'max': 0, 'sum': 0}
         start = time()
         val = {'height': i % 999, 'width': i % 777, 'sth': i % 10**6 + 1, 'sth2': i % 10**6 + 1}
-        print(i)
         if backend in ('dd', 'ht', 'ch'):
-            ht['test' + str(i)] = val
+            ht[i] = val
         if backend == 'dt':
-            ht['test' + str(i)] = tuple(val.values())
+            ht[i] = tuple(val.values())
         #ht.get('test' + str(i))
         exec_time = (time() - start) * 10**6
         stats['min'] = min(stats['min'], exec_time)
